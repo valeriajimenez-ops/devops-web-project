@@ -1,0 +1,54 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Trabajadores</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/workers.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <span class="hamburger-btn material-symbols-rounded">menu</span>
+            <a href="#" class="logo">
+                <h2>DevOps Web Project</h2>
+            </a>
+            <ul class="links">
+                <span class="close-btn material-symbols-rounded">close</span>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campañas</a></li>
+                <li><a href="tasks.html">Tareas</a></li>
+                <li><a href="workers.html">Trabajadores</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main-content">
+        <h1>Trabajadores</h1>
+
+        <table id="workersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Registrar Trabajador</h2>
+        <form id="createWorkerForm">
+            <label>Nombres:
+                <input type="text" id="firstName" required>
+            </label>
+            <label>Apellidos:
+                <input type="text" id="lastName" required>
+            </label>
+            <label>Email:
+                <input type="email" id="email" required>
+            </label>
+            <div class="create-action-button-container"><button type="submit" class="create-action-button">Registrar</button></div>
+        </form>
+    </main>
+</body>
+</html>

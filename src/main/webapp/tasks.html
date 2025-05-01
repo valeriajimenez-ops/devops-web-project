@@ -1,0 +1,87 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tareas</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/tasks.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <span class="hamburger-btn material-symbols-rounded">menu</span>
+            <a href="#" class="logo">
+                <h2>DevOps Web Project</h2>
+            </a>
+            <ul class="links">
+                <span class="close-btn material-symbols-rounded">close</span>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="campaigns.html">Campañas</a></li>
+                <li><a href="tasks.html">Tareas</a></li>
+                <li><a href="workers.html">Trabajadores</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main-content">
+        <h1>Tareas</h1>
+
+        <table id="tasksTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>nombre</th>
+                    <th>Descripción</th>
+                    <th>Campaña</th>
+                    <th>Asignado a</th>
+                    <th>Fecha Vmto.</th>
+                    <th>Horas est.</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Crear Nueva Tarea</h2>
+        <form id="createTaskForm">
+            <label>Título:
+                <input type="text" id="name" required>
+            </label>
+            <label>Descripción:
+                <input type="text" id="description" required>
+            </label>
+            <label>Campaña:
+                <input type="text" id="campaignName" readonly>
+            </label>
+            <button type="button" class="search-action-button" onclick="openCampaignPopup()">Buscar</button>
+            <label>Trabajador:
+                <input type="text" id="workerName" readonly>
+            </label>
+            <button type="button" class="search-action-button" onclick="openWorkerPopup()">Buscar</button>
+            <label>Horas Est.:
+                <input type="text" id="estimatedHours" required>
+            </label>
+            <input type="hidden" id="campaignId">
+            <input type="hidden" id="workerId">
+            <div class="create-action-button-container"><button type="submit" class="create-action-button">Crear</button></div>
+        </form>
+    </main>
+
+    <!-- Overlay -->
+    <div id="overlay" class="task-popup-overlay" onclick="closeAllPopups()"></div>
+
+    <!-- Popup Campaña -->
+    <div id="campaignPopup" class="task-form-popup">
+        <h3>Seleccionar Campaña</h3>
+        <input type="text" id="campaignSearch" placeholder="Buscar campaña...">
+        <ul id="campaignList"></ul>
+        <button class="action-button" onclick="closeCampaignPopup()">Cerrar</button>
+    </div>
+
+    <!-- Popup Trabajador -->
+    <div id="workerPopup" class="task-form-popup">
+        <h3>Seleccionar Trabajador</h3>
+        <input type="text" id="workerSearch" placeholder="Buscar trabajador...">
+        <ul id="workerList"></ul>
+        <button class="action-button" onclick="closeWorkerPopup()">Cerrar</button>
+    </div>
+</body>
+</html>
