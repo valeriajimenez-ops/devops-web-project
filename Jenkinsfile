@@ -43,22 +43,20 @@ stage('Copying war file') {
                 bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .' 
             }
         }
-        stage('run container') {
-            steps {
-                echo 'Stopping and removing old container if exists...'
-                // Detiene el contenedor si ya está corriendo. || true evita que el pipeline falle si no existe
-                bat 'docker stop devops-web-project-server || true' 
-                echo 'Removing old container if exists...'
-                // Elimina el contenedor si existe. || true evita que el pipeline falle si no existe
-                bat 'docker rm devops-web-project-server || true'  
-                echo 'Running new Docker container...'
-                // Ejecuta un nuevo contenedor en segundo plano (-d), con un nombre (--name),
-                // una etiqueta (--label) y mapeando puertos (-p 8081 del host al 8080 del contenedor)
-                // Usamos la imagen que acabamos de construir
-                // REEMPLAZA <nombre de usuario> por tu nombre de usuario REAL de Docker Hub
-                // Si el puerto 8081 está ocupado, tendrás que cambiarlo aquí (ej: 8082:8080 o 9000:8080)
-                bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 valeriajimenez-ops/devops-web-project:v1' 
-            }
-        }
+stage('run container') {
+    steps {
+        echo 'Stopping and removing old container if exists...'
+        // Usar powershell para que || true funcione correctamente
+        powershell 'docker stop devops-web-project-server || true' 
+        echo 'Removing old container if exists...'
+        // Usar powershell para que || true funcione correctamente
+        powershell 'docker rm devops-web-project-server || true'  
+        echo 'Running new Docker container...'
+        // Mantener esta línea como bat si el docker build funcionó así,
+        // o cambiarla a powershell también para consistencia.
+        // Como docker build funcionó con bat, mantengamos docker run como bat por ahora.
+        bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 <nombre de usuario>/devops-web-project:v1' 
+    }
+}
     }
 }
