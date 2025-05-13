@@ -45,16 +45,26 @@ stage('Copying war file') {
         }
 stage('run container') {
     steps {
-        echo 'Stopping and removing old container if exists...'
-        // Usar powershell para que || true funcione correctamente
-        powershell 'docker stop devops-web-project-server || true' 
-        echo 'Removing old container if exists...'
-        // Usar powershell para que || true funcione correctamente
-        powershell 'docker rm devops-web-project-server || true'  
+        echo 'Checking for and stopping/removing old container if exists...'
+        script {
+            powershell '''
+              # Verificar si el contenedor existe
+              $container = docker inspect -f "{{.Id}}" devops-web-project-server 2>$null
+
+              # Si el comando docker inspect no dio error (significa que encontró el contenedor)
+              if ($LASTEXITCODE -eq 0) {
+                  echo "Container devops-web-project-server found. Stopping..."
+                  docker stop devops-web-project-server
+                  echo "Container devops-web-project-server stopped. Removing..."
+                  docker rm devops-web-project-server
+                  echo "Container devops-web-project-server removed."
+              } else {
+                  echo "Container devops-web-project-server does not exist. Skipping stop/remove."
+              }
+            '''
+        }
         echo 'Running new Docker container...'
-        // Mantener esta línea como bat si el docker build funcionó así,
-        // o cambiarla a powershell también para consistencia.
-        // Como docker build funcionó con bat, mantengamos docker run como bat por ahora.
+        // Mantener esta línea como bat, o cambiarla a powershell si quieres consistencia
         bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 <nombre de usuario>/devops-web-project:v1' 
     }
 }
