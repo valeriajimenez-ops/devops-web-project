@@ -1,4 +1,4 @@
-pipeline {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pipeline {
     agent {
         node {
             // Usar el agente incorporado de Jenkins, que es el que corre en tu máquina local
@@ -20,14 +20,13 @@ pipeline {
                 bat 'mvn clean package' 
             }
         }
-        stage('Copying war file') {
-            steps {
-                echo 'Copying war file..'
-                // Mover el archivo .war generado al directorio raíz del workspace
-                // Usamos 'move /Y' para Windows (sobrescribe si existe) y barras normales '/' para compatibilidad con Groovy
-                bat 'move /Y target/*.war .' 
-            }
-        }
+stage('Copying war file') {
+    steps {
+        echo 'Copying war file..'
+        // Copiar el archivo .war usando PowerShell y forzar sobrescritura
+        powershell 'Copy-Item -Path "target/*.war" -Destination "." -Force' 
+    }
+}
         stage('cleanup') {
             steps {
                 echo 'Cleaning up unused Docker resources...'
