@@ -20,7 +20,7 @@ pipeline {
                 echo 'Copying war file..'
                 // Cambiado de sh a bat. Nota: 'mv' es comando de Linux. Si 'bat move target\*.war .' no funciona,
                 // podría requerir configuración adicional en Jenkins o usar 'move' en lugar de 'mv'.
-                bat 'mv target/*.war .' 
+                bat 'move target/*.war .' 
             }
         }
         stage('cleanup') {
