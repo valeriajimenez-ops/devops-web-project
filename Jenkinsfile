@@ -61,10 +61,13 @@ stage('run container') {
               } else {
                   echo "Container devops-web-project-server does not exist. Skipping stop/remove."
               }
+
+              # Forzar un código de salida exitoso (0) para el script de PowerShell
+              exit 0; 
             '''
         }
         echo 'Running new Docker container...'
-        // Mantener esta línea como bat, o cambiarla a powershell si quieres consistencia
+        // Asegúrate de que el nombre de usuario de Docker Hub está bien aquí también
         bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 <nombre de usuario>/devops-web-project:v1' 
     }
 }
