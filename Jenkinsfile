@@ -40,7 +40,7 @@ stage('Copying war file') {
                 echo 'Building Docker image...'
                 // Construye la imagen Docker usando el Dockerfile en el directorio actual (.)
                 // REEMPLAZA <nombre de usuario> por tu nombre de usuario REAL de Docker Hub
-                bat 'docker build -t <nombre de usuario>/devops-web-project:v1 --label devops-web-project-server .' 
+                bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .' 
             }
         }
         stage('run container') {
@@ -57,7 +57,7 @@ stage('Copying war file') {
                 // Usamos la imagen que acabamos de construir
                 // REEMPLAZA <nombre de usuario> por tu nombre de usuario REAL de Docker Hub
                 // Si el puerto 8081 está ocupado, tendrás que cambiarlo aquí (ej: 8082:8080 o 9000:8080)
-                bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 <nombre de usuario>/devops-web-project:v1' 
+                bat 'docker run -d --name devops-web-project-server --label devops-web-project-server -p 8081:8080 valeriajimenez-ops/devops-web-project:v1' 
             }
         }
     }
