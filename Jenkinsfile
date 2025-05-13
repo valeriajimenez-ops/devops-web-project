@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label 'dockerhost-build-server' // O la etiqueta de tu agente Jenkins con Docker
+            label 'built-in' // O la etiqueta de tu agente Jenkins con Docker
         }
     }
     tools {
