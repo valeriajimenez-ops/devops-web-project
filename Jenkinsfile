@@ -5,7 +5,7 @@ pipeline {
         }
     }
     tools {
-        maven 'maven-3.9.6' // Asegúrate de que el nombre de tu herramienta Maven configurada en Jenkins sea 'maven-3.9.6'
+        maven 'Maven 3.9.x' // Asegúrate de que el nombre de tu herramienta Maven configurada en Jenkins sea 'maven-3.9.6'
     }
     stages {
         stage('Packaging') {
