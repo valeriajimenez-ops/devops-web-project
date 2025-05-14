@@ -42,7 +42,7 @@ pipeline {
                 echo 'Logging into Docker Hub...'
                 // Iniciar sesión en Docker Hub usando PowerShell para manejar el pipe (corregido de sh)
                 // Asegúrate de que la credencial 'devops-dockerhub-token' esté configurada correctamente
-                powershell "echo $env.DOCKERHUB_CREDENTIALS_PSW | docker login -u $env.DOCKERHUB_CREDENTIALS_USR --password-stdin docker.io"
+                powershell "echo $env.DOCKERHUB_CREDENTIALS_PSW | docker login -u \"$env.DOCKERHUB_CREDENTIALS_USR\" --password-stdin docker.io"
             }
         }
         stage('Push to Docker Hub') {
