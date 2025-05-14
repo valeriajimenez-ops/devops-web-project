@@ -57,9 +57,9 @@ pipeline {
     }
 post {
     always {
-        script { // Añadir bloque script aquí
-            sh 'docker logout' // El sh step ahora está dentro del script
-        } // Cerrar bloque script aquí
+        agent any // <-- Añadir esta línea aquí
+        // Elimina el bloque 'script' que pusimos antes, el paso 'sh' va directo aquí
+        sh 'docker logout' 
     }
 }
 }
