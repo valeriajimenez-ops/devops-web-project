@@ -1,0 +1,65 @@
+pipeline {
+    agent {
+        node {
+            // Usar el agente incorporado de Jenkins en tu máquina Windows
+            label 'built-in'
+        }
+    }
+    tools {
+        // Asegúrate de que este nombre coincide con tu configuración de Jenkins
+        maven 'Maven 3.9.x' // Usa el nombre exacto que tienes configurado para Maven
+    }
+    environment {
+        // Importante: Debes tener una credencial global en Jenkins (Gestionar Jenkins -> Gestionar Credenciales)
+        // con ID 'devops-dockerhub-token' que contenga tu Usuario de Docker Hub y tu Token/Contraseña.
+        DOCKERHUB_CREDENTIALS = credentials('devops-dockerhub-token')
+    }
+    stages {
+        stage('Packaging') {
+            steps {
+                echo 'Packaging Frontend..'
+                // Empaquetar la aplicación Java del frontend usando bat
+                bat 'mvn clean package'
+            }
+        }
+        stage('Copying war file') {
+            steps {
+                echo 'Copying war file..'
+                // Copiar el archivo .war usando PowerShell y forzar sobrescritura
+                powershell 'Copy-Item -Path "target/*.war" -Destination "." -Force'
+            }
+        }
+         stage('build image') {
+             steps {
+                 echo 'Building Docker image for Frontend...'
+                 // Construye la imagen Docker para el frontend con tu nombre de usuario
+                 // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
+                 bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .'
+             }
+         }
+        stage('Docker Hub Login') {
+            steps {
+                echo 'Logging into Docker Hub...'
+                // Iniciar sesión en Docker Hub usando la credencial.
+                // NOTA: Esta sintaxis 'sh' con pipe puede requerir ajustar a powershell o bat
+                // en algunos entornos Windows si da problemas. Si falla, avísame.
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                 echo 'Pushing Docker image to Docker Hub...'
+                // Subir la imagen a tu repositorio en Docker Hub
+                // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
+                sh 'docker push valeriajimenez-ops/devops-web-project:v1'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Logging out from Docker Hub...'
+            // Cerrar sesión en Docker Hub al finalizar (siempre se ejecuta)
+            sh 'docker logout'
+        }
+    }
+}
