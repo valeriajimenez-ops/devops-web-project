@@ -55,11 +55,11 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            echo 'Logging out from Docker Hub...'
-            // Cerrar sesión en Docker Hub al finalizar (siempre se ejecuta)
-            sh 'docker logout'
-        }
+post {
+    always {
+        script { // Añadir bloque script aquí
+            sh 'docker logout' // El sh step ahora está dentro del script
+        } // Cerrar bloque script aquí
     }
+}
 }
