@@ -57,9 +57,11 @@ pipeline {
     }
 post {
     always {
-        agent any // <-- Añadir esta línea aquí
-        // Elimina el bloque 'script' que pusimos antes, el paso 'sh' va directo aquí
-        sh 'docker logout' 
+        script { // Inicia un bloque script
+            node('built-in') { // Dentro del script, solicita explícitamente el nodo 'built-in'
+                sh 'docker logout' // Ejecuta el comando sh en el nodo solicitado
+            } // Cierra el bloque node
+        } // Cierra el bloque script
     }
 }
 }
