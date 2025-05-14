@@ -18,21 +18,21 @@ pipeline {
         stage('Packaging') {
             steps {
                 echo 'Packaging Frontend..'
-                // Empaquetar la aplicación Java del frontend usando bat
+                // Empaquetar la aplicación Java del frontend usando bat (corregido de sh)
                 bat 'mvn clean package'
             }
         }
         stage('Copying war file') {
             steps {
                 echo 'Copying war file..'
-                // Copiar el archivo .war usando PowerShell y forzar sobrescritura
+                // Copiar el archivo .war usando PowerShell (corregido de sh)
                 powershell 'Copy-Item -Path "target/*.war" -Destination "." -Force'
             }
         }
          stage('build image') {
              steps {
                  echo 'Building Docker image for Frontend...'
-                 // Construye la imagen Docker para el frontend con tu nombre de usuario
+                 // Construye la imagen Docker para el frontend con tu nombre de usuario usando bat (corregido de sh)
                  // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
                  bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .'
              }
@@ -40,28 +40,29 @@ pipeline {
         stage('Docker Hub Login') {
             steps {
                 echo 'Logging into Docker Hub...'
-                // Iniciar sesión en Docker Hub usando la credencial.
-                // NOTA: Esta sintaxis 'sh' con pipe puede requerir ajustar a powershell o bat
-                // en algunos entornos Windows si da problemas. Si falla, avísame.
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                // Iniciar sesión en Docker Hub usando PowerShell para manejar el pipe (corregido de sh)
+                // Asegúrate de que la credencial 'devops-dockerhub-token' esté configurada correctamente
+                powershell "echo $env.DOCKERHUB_CREDENTIALS_PSW | docker login -u $env.DOCKERHUB_CREDENTIALS_USR --password-stdin"
             }
         }
         stage('Push to Docker Hub') {
             steps {
                  echo 'Pushing Docker image to Docker Hub...'
-                // Subir la imagen a tu repositorio en Docker Hub
+                // Subir la imagen a tu repositorio en Docker Hub usando bat (corregido de sh)
                 // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
-                sh 'docker push valeriajimenez-ops/devops-web-project:v1'
+                bat 'docker push valeriajimenez-ops/devops-web-project:v1'
             }
         }
     }
-post {
-    always {
-        script { // Inicia un bloque script
-            node('built-in') { // Dentro del script, solicita explícitamente el nodo 'built-in'
-                sh 'docker logout' // Ejecuta el comando sh en el nodo solicitado
-            } // Cierra el bloque node
-        } // Cierra el bloque script
+    post {
+        always {
+            script { // Mantenemos el bloque script para asegurar contexto en post
+                node('built-in') { // Solicitamos explícitamente el nodo built-in dentro del script
+                    echo 'Logging out from Docker Hub...'
+                    // Cerrar sesión en Docker Hub usando bat (corregido de sh)
+                    bat 'docker logout'
+                }
+            }
+        }
     }
-}
 }
