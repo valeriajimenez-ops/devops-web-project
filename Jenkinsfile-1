@@ -4,77 +4,54 @@ pipeline {
             label 'built-in'
         }
     }
-
     tools {
-        maven 'Maven 3.9.x' // Ajusta si tu herramienta Maven tiene otro nombre
+        maven 'Maven 3.9.x'
     }
-
+    environment {
+        DOCKER_USERNAME = 'ginavaleriajimenez'
+        DOCKER_TOKEN = 'dckr_pat_U4_5aoYEIoZrSkx7q04uLF9gVB4'
+    }
     stages {
         stage('Packaging') {
             steps {
-                echo '[INFO] Empaquetando aplicación Java con Maven...'
+                echo 'Packaging Frontend...'
                 bat 'mvn clean package'
             }
         }
-
-        stage('Verificar WAR') {
+        stage('Copying war file') {
             steps {
-                script {
-                    def warFile = bat(script: 'dir /b target\\*.war', returnStdout: true).trim()
-                    if (!warFile) {
-                        error '[ERROR] No se encontró ningún archivo .war en target/.'
-                    } else {
-                        echo "[INFO] Se encontró el archivo: ${warFile}"
-                    }
-                }
+                echo 'Copying war file...'
+                powershell 'Copy-Item -Path "target/*.war" -Destination "." -Force'
             }
         }
-
-        stage('Copiar WAR') {
+        stage('Build Docker Image') {
             steps {
-                echo '[INFO] Copiando archivo WAR al directorio raíz del proyecto...'
-                powershell 'Copy-Item -Path "target\\*.war" -Destination "." -Force'
+                echo 'Building Docker image...'
+                bat 'docker build -t ginavaleriajimenez/devops-web-project:v1 --label devops-web-project-server .'
             }
         }
-
-        stage('Construir imagen Docker') {
-            steps {
-                echo '[INFO] Construyendo imagen Docker...'
-                bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .'
-            }
-        }
-
-        stage('Login en Docker Hub') {
+        stage('Docker Hub Login') {
             steps {
                 echo '[INFO] Iniciando sesión en Docker Hub...'
-                withCredentials([usernamePassword(credentialsId: 'devops-dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    powershell """
-                        echo \$env:DOCKER_PASS | docker login -u \$env:DOCKER_USER --password-stdin
-                    """
-                }
+                powershell """
+                    echo ${DOCKER_TOKEN} | docker login -u "${DOCKER_USERNAME}" --password-stdin
+                """
             }
         }
-
-        stage('Publicar imagen en Docker Hub') {
+        stage('Push to Docker Hub') {
             steps {
-                echo '[INFO] Subiendo imagen a Docker Hub...'
-                bat 'docker push valeriajimenez-ops/devops-web-project:v1'
+                echo '[INFO] Publicando imagen en Docker Hub...'
+                bat 'docker push ginavaleriajimenez/devops-web-project:v1'
             }
         }
     }
-
     post {
         always {
-            echo '[INFO] Limpiando sesión de Docker...'
+            echo '[INFO] Cerrando sesión de Docker...'
             bat 'docker logout || echo "Ya estaba desconectado."'
         }
-
         failure {
             echo '[ERROR] La ejecución del pipeline falló. Revisa los logs para más detalles.'
-        }
-
-        success {
-            echo '[SUCCESS] Pipeline ejecutado correctamente. Imagen subida a Docker Hub.'
         }
     }
 }
