@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        // Usamos el ID correcto de las credenciales
+        DOCKERHUB_CREDENTIALS = credentials('devops-dockerhub-token')
     }
 
     stages {
@@ -12,6 +13,7 @@ pipeline {
                 bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 .'
             }
         }
+
         stage('Login Docker Hub') {
             steps {
                 echo 'Iniciando sesión en Docker Hub...'
@@ -20,6 +22,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 echo 'Subiendo imagen a Docker Hub...'
@@ -39,5 +42,6 @@ pipeline {
         }
     }
 }
+
 
 
