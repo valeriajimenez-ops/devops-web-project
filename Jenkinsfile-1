@@ -1,68 +1,80 @@
 pipeline {
     agent {
         node {
-            // Usar el agente incorporado de Jenkins en tu máquina Windows
             label 'built-in'
         }
     }
+
     tools {
-        // Asegúrate de que este nombre coincide con tu configuración de Jenkins
-        maven 'Maven 3.9.x' // Usa el nombre exacto que tienes configurado para Maven
+        maven 'Maven 3.9.x' // Ajusta si tu herramienta Maven tiene otro nombre
     }
-    environment {
-        // Importante: Debes tener una credencial global en Jenkins (Gestionar Jenkins -> Gestionar Credenciales)
-        // con ID 'devops-dockerhub-token' que contenga tu Usuario de Docker Hub y tu Token/Contraseña.
-        DOCKERHUB_CREDENTIALS = credentials('devops-dockerhub-token')
-    }
+
     stages {
         stage('Packaging') {
             steps {
-                echo 'Packaging Frontend..'
-                // Empaquetar la aplicación Java del frontend usando bat (corregido de sh)
+                echo '[INFO] Empaquetando aplicación Java con Maven...'
                 bat 'mvn clean package'
             }
         }
-        stage('Copying war file') {
+
+        stage('Verificar WAR') {
             steps {
-                echo 'Copying war file..'
-                // Copiar el archivo .war usando PowerShell (corregido de sh)
-                powershell 'Copy-Item -Path "target/*.war" -Destination "." -Force'
+                script {
+                    def warFile = bat(script: 'dir /b target\\*.war', returnStdout: true).trim()
+                    if (!warFile) {
+                        error '[ERROR] No se encontró ningún archivo .war en target/.'
+                    } else {
+                        echo "[INFO] Se encontró el archivo: ${warFile}"
+                    }
+                }
             }
         }
-         stage('build image') {
-             steps {
-                 echo 'Building Docker image for Frontend...'
-                 // Construye la imagen Docker para el frontend con tu nombre de usuario usando bat (corregido de sh)
-                 // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
-                 bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .'
-             }
-         }
-        stage('Docker Hub Login') {
+
+        stage('Copiar WAR') {
             steps {
-                echo 'Logging into Docker Hub...'
-                // Iniciar sesión en Docker Hub usando PowerShell para manejar el pipe (corregido de sh)
-                // Asegúrate de que la credencial 'devops-dockerhub-token' esté configurada correctamente
-                powershell "echo $env.DOCKERHUB_CREDENTIALS_PSW | docker login -u \"$env.DOCKERHUB_CREDENTIALS_USR\" --password-stdin docker.io"
+                echo '[INFO] Copiando archivo WAR al directorio raíz del proyecto...'
+                powershell 'Copy-Item -Path "target\\*.war" -Destination "." -Force'
             }
         }
-        stage('Push to Docker Hub') {
+
+        stage('Construir imagen Docker') {
             steps {
-                 echo 'Pushing Docker image to Docker Hub...'
-                // Subir la imagen a tu repositorio en Docker Hub usando bat (corregido de sh)
-                // Tu nombre de usuario de Docker Hub es valeriajimenez-ops
+                echo '[INFO] Construyendo imagen Docker...'
+                bat 'docker build -t valeriajimenez-ops/devops-web-project:v1 --label devops-web-project-server .'
+            }
+        }
+
+        stage('Login en Docker Hub') {
+            steps {
+                echo '[INFO] Iniciando sesión en Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'devops-dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    powershell """
+                        echo \$env:DOCKER_PASS | docker login -u \$env:DOCKER_USER --password-stdin
+                    """
+                }
+            }
+        }
+
+        stage('Publicar imagen en Docker Hub') {
+            steps {
+                echo '[INFO] Subiendo imagen a Docker Hub...'
                 bat 'docker push valeriajimenez-ops/devops-web-project:v1'
             }
         }
     }
+
     post {
         always {
-            script { // Mantenemos el bloque script para asegurar contexto en post
-                node('built-in') { // Solicitamos explícitamente el nodo built-in dentro del script
-                    echo 'Logging out from Docker Hub...'
-                    // Cerrar sesión en Docker Hub usando bat (corregido de sh)
-                    bat 'docker logout'
-                }
-            }
+            echo '[INFO] Limpiando sesión de Docker...'
+            bat 'docker logout || echo "Ya estaba desconectado."'
+        }
+
+        failure {
+            echo '[ERROR] La ejecución del pipeline falló. Revisa los logs para más detalles.'
+        }
+
+        success {
+            echo '[SUCCESS] Pipeline ejecutado correctamente. Imagen subida a Docker Hub.'
         }
     }
 }
