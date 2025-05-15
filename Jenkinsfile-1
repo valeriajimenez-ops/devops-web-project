@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Referencia la credencial creada en Jenkins (el ID que pusiste)
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
@@ -33,9 +32,12 @@ pipeline {
         always {
             echo 'Cerrando sesión de Docker Hub...'
             script {
-                bat 'docker logout'
+                node {
+                    bat 'docker logout'
+                }
             }
         }
     }
 }
+
 
