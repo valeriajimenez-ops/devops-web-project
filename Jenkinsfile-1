@@ -32,7 +32,10 @@ pipeline {
     post {
         always {
             echo 'Cerrando sesión de Docker Hub...'
-            bat 'docker logout'
+            script {
+                bat 'docker logout'
+            }
         }
     }
 }
+
